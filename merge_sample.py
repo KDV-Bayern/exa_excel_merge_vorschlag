@@ -41,7 +41,7 @@ def is_already_set(con, pruefung_id, mtknr):
 
 
 def is_valid_value(pruefung_id, note):
-    # todo, ggf. auf der Basis der Notengebungsart etc. prüfen
+    # Im realen System z. B. auf der Basis der Notengebungsart etc. prüfen
     return note is not None and note in [1, 1.3, 1.7, 2, 2.3, 2.7, 3, 3.3, 3.7, 4, 5]
 
 
@@ -60,21 +60,24 @@ def merge_data(pruefung_id, new_data):
         for mtknr in new_data.keys():
             note = new_data[mtknr]
             if is_already_set(con, pruefung_id, mtknr):
-                if is_valid_value(pruefung_id, note) and is_modified(con, pruefung_id, mtknr, note):
-                    print(f"Wollen Sie die Note zu {mtknr} auf {note} aktualisieren? (j/n)")
-                    answer = input()
-                    if answer == 'j':
-                        con.execute(update_sql, (note, pruefung_id, mtknr))
-                        print(f"angepasst")
+                if is_valid_value(pruefung_id, note):
+                    if is_modified(con, pruefung_id, mtknr, note):
+                        print(f"Wollen Sie die Note zu {mtknr} auf {note} aktualisieren? (j/n)")
+                        answer = input()
+                        if answer == 'j':
+                            con.execute(update_sql, (note, pruefung_id, mtknr))
+                            print(f"angepasst")
+                        else:
+                            print(f"unverändert")
                     else:
-                        print(f"wird nicht geändert")
+                        print(f"Note zu {mtknr} wird nicht geändert, Notenwert unverändert")
                 else:
-                    print(f"Note zu {mtknr} wird nicht geändert, da Notenwert unverändert, Zeile leer oder ungültig")
+                    print(f"Note zu {mtknr} wird nicht geändert, Zeile leer oder ungültig")
             else:
-                print(f"Mtknr: {mtknr} Note: {note}")
+                print(f"Mtknr: {mtknr} Note: {note} hinzufügen")
                 # im Falle von HISinOne wegen bereits bestehendem Anmeldesatz auch Update, so aber
                 # einfacher im Beispiel darzustellen...
-                con.execute(insert_sql, (pruefung_id, mtknr, note))
+                con.execute(insert_sql, (pruefung_id, mtknr, note))                
 
 
 
