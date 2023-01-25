@@ -1,3 +1,12 @@
+#
+# Voraussetzungen:
+#
+# pip install xlrd
+# pip install sqlite3
+#
+# oder unter z. B. Ubuntu: apt install python3-xlrd python3-sqlite3
+#
+
 import xlrd
 import sqlite3
 
@@ -31,20 +40,36 @@ def is_already_set(con, pruefung_id, mtknr):
     return result >= 1
 
 
+def is_valid_value(pruefung_id, note):
+    # todo, ggf. auf der Basis der Notengebungsart etc. prüfen
+    return note is not None and note in [1, 1.3, 1.7, 2, 2.3, 2.7, 3, 3.3, 3.7, 4, 5]
+
+
+def is_modified(con, pruefung_id, mtknr, note):
+    sql = "select count(*) as anzahl from pruefungsergebnis where pruefung_id = ? and mtknr = ? and note = ?"
+    cur = con.cursor()
+    cur.execute(sql, (pruefung_id, mtknr, note))
+    result = cur.fetchone()[0]
+    return result == 0
+
+
 def merge_data(pruefung_id, new_data):
     update_sql = "update pruefungsergebnis set note = ? where pruefung_id = ? and mtknr = ?"
     insert_sql = "insert into pruefungsergebnis (pruefung_id, mtknr, note) values (?, ?, ?)"
     with con: # Transaktionsscope: Fehler führt zuverlässig zum Verwerfen aller Änderungen aus einer Excel-Datei
         for mtknr in new_data.keys():
             note = new_data[mtknr]
-            if is_already_set(con, pruefung_id, mtknr):                
-                print(f"Wollen Sie die Note zu {mtknr} auf {note} aktualisieren? (j/n)")
-                answer = input()
-                if answer == 'j':
-                    con.execute(update_sql, (note, pruefung_id, mtknr))
-                    print(f"angepasst")
+            if is_already_set(con, pruefung_id, mtknr):
+                if is_valid_value(pruefung_id, note) and is_modified(con, pruefung_id, mtknr, note):
+                    print(f"Wollen Sie die Note zu {mtknr} auf {note} aktualisieren? (j/n)")
+                    answer = input()
+                    if answer == 'j':
+                        con.execute(update_sql, (note, pruefung_id, mtknr))
+                        print(f"angepasst")
+                    else:
+                        print(f"wird nicht geändert")
                 else:
-                    print(f"wird nicht geändert")
+                    print(f"Note zu {mtknr} wird nicht geändert, da Notenwert unverändert, Zeile leer oder ungültig")
             else:
                 print(f"Mtknr: {mtknr} Note: {note}")
                 # im Falle von HISinOne wegen bereits bestehendem Anmeldesatz auch Update, so aber
