@@ -7,7 +7,7 @@ con = sqlite3.connect(SQLITE_FILE)
 #con.commit()
 
 # Hier als Konstante, da in der Praxis wahrscheinlich aus Kontext in Webanwendung abgeleitet
-PRUEFUNG_ID = 2
+PRUEFUNG_ID = 3
 
 def read_file(filename):
     # alle Validierungsschritte zugunsten eines übersichtlichen Beispiels eingespart
@@ -31,17 +31,17 @@ def is_already_set(con, pruefung_id, mtknr):
     return result >= 1
 
 
-def merge_data(new_data):
+def merge_data(pruefung_id, new_data):
     update_sql = "update pruefungsergebnis set note = ? where pruefung_id = ? and mtknr = ?"
     insert_sql = "insert into pruefungsergebnis (pruefung_id, mtknr, note) values (?, ?, ?)"
     with con: # Transaktionsscope: Fehler führt zuverlässig zum Verwerfen aller Änderungen aus einer Excel-Datei
         for mtknr in new_data.keys():
             note = new_data[mtknr]
-            if is_already_set(con, PRUEFUNG_ID, mtknr):                
+            if is_already_set(con, pruefung_id, mtknr):                
                 print(f"Wollen Sie die Note zu {mtknr} auf {note} aktualisieren? (j/n)")
                 answer = input()
                 if answer == 'j':
-                    con.execute(update_sql, (note, PRUEFUNG_ID, mtknr))
+                    con.execute(update_sql, (note, pruefung_id, mtknr))
                     print(f"angepasst")
                 else:
                     print(f"wird nicht geändert")
@@ -49,12 +49,12 @@ def merge_data(new_data):
                 print(f"Mtknr: {mtknr} Note: {note}")
                 # im Falle von HISinOne wegen bereits bestehendem Anmeldesatz auch Update, so aber
                 # einfacher im Beispiel darzustellen...
-                con.execute(insert_sql, (PRUEFUNG_ID, mtknr, note))
+                con.execute(insert_sql, (pruefung_id, mtknr, note))
 
 
 
 f1 = read_file("excel_file_1.xlsx")
-merge_data(f1)
+merge_data(PRUEFUNG_ID, f1)
 
 f2 = read_file("excel_file_2.xlsx")
-merge_data(f2)
+merge_data(PRUEFUNG_ID, f2)
