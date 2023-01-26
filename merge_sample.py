@@ -19,7 +19,7 @@ connection = sqlite3.connect(SQLITE_FILE)
 
 # Hier als Konstante, da in der Praxis wahrscheinlich aus Kontext
 # in Webanwendung abgeleitet
-PRUEFUNG_ID = 3
+PRUEFUNG_ID = 5
 
 def read_file(filename):
     # alle Validierungsschritte zugunsten eines übersichtlichen Beispiels eingespart
@@ -81,12 +81,13 @@ def merge_data(pruefung_id, new_data):
                         print(f"Note zu {mtknr} wird nicht geändert, Notenwert unverändert")
                 else:
                     print(f"Note zu {mtknr} wird nicht geändert, Zeile leer oder ungültig")
-            else:
+            elif is_valid_value(pruefung_id, note):
                 print(f"Mtknr: {mtknr} Note: {note} hinzufügen")
                 # im Falle von HISinOne wegen bereits bestehendem Anmeldesatz auch Update, so aber
                 # einfacher im Beispiel darzustellen...
                 connection.execute(insert_sql, (pruefung_id, mtknr, note))
-
+            else:
+                print(f"Fehlender oder ungültiger Notenwert für Mtknr {mtknr}")
 
 
 f1 = read_file("excel_file_1.xlsx")
