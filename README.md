@@ -51,7 +51,7 @@ für alle Zeilen im Tabellenblatt:
 ### Output eines Durchlaufs mit den gegebenen Testdaten
 
 ```
-$ python3 merge_sample.py 
+~/git/example_merge_bug4599$ python3 merge_sample.py 
 
 Importiere aus excel_file_1.xlsx - Tabelle1
 Mtknr: 1 Note: 1.0 hinzufügen
@@ -60,14 +60,35 @@ Mtknr: 3 Note: 1.0 hinzufügen
 Mtknr: 4 Note: 3.0 hinzufügen
 Mtknr: 5 Note: 2.3 hinzufügen
 Fehlender oder ungültiger Notenwert für Mtknr 6
+---
+Datenbankstand nach Import: 
 
+pruefung_id     mtknr   note
+6               1       1
+6               2       1.3
+6               3       1
+6               4       3
+6               5       2.3
+---
 Importiere aus excel_file_2.xlsx - Tabelle1
 Wollen Sie die Note zu 1 auf 1.3 aktualisieren? (j/n)
-n
-unverändert
+j
+angepasst
 Mtknr: 7 Note: 1.3 hinzufügen
 Mtknr: 8 Note: 1.0 hinzufügen
 Mtknr: 9 Note: 3.0 hinzufügen
 Note zu 2 wird nicht geändert, Zeile leer oder ungültig
 Note zu 3 wird nicht geändert, Zeile leer oder ungültig
+---
+Datenbankstand nach Import: 
+
+pruefung_id     mtknr   note
+6               1       1.3
+6               2       1.3
+6               3       1
+6               4       3
+6               5       2.3
+6               7       1.3
+6               8       1
+6               9       3
 ```

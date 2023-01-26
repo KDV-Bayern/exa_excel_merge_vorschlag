@@ -19,7 +19,7 @@ connection = sqlite3.connect(SQLITE_FILE)
 
 # Hier als Konstante, da in der Praxis wahrscheinlich aus Kontext
 # in Webanwendung abgeleitet
-PRUEFUNG_ID = 5
+PRUEFUNG_ID = 6
 
 def read_file(filename):
     # alle Validierungsschritte zugunsten eines übersichtlichen Beispiels eingespart
@@ -33,6 +33,17 @@ def read_file(filename):
     }
 
     return data
+
+
+def print_result(con, pruefung_id):
+    sql = "select * from pruefungsergebnis where pruefung_id = ?"
+    cur = con.cursor()
+    cur.execute(sql, (pruefung_id, ))
+    result = cur.fetchall()
+    print("Datenbankstand nach Import: \n")
+    print("pruefung_id\tmtknr\tnote")
+    for entry in result:
+        print(f"{entry[0]}\t\t{entry[1]}\t{entry[2]}")
 
 
 def is_already_set(con, pruefung_id, mtknr):
@@ -93,5 +104,12 @@ def merge_data(pruefung_id, new_data):
 f1 = read_file("excel_file_1.xlsx")
 merge_data(PRUEFUNG_ID, f1)
 
+print("---")
+print_result(connection, PRUEFUNG_ID)
+print("---")
+
 f2 = read_file("excel_file_2.xlsx")
 merge_data(PRUEFUNG_ID, f2)
+
+print("---")
+print_result(connection, PRUEFUNG_ID)
